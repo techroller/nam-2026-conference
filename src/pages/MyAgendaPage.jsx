@@ -1,10 +1,12 @@
 import { Link } from 'react-router-dom';
-import * as api from '../lib/api.js';
 import { useConference, useFetch } from '../lib/store.jsx';
-import { useDocumentTitle } from '../lib/useDocumentTitle.js';
-import { travelHops } from '../lib/travel.js';
+import * as api from '../lib/api.js';
+import { agendaDays, hoursLabel } from '../lib/agenda.js';
+import { hasEnded } from '../lib/clock.js';
 import { dayLabel } from '../lib/format.js';
-import { Button, SectionHeader, Skeleton } from '../components/ui.jsx';
+import { travelHops } from '../lib/travel.js';
+import { useDocumentTitle } from '../lib/useDocumentTitle.js';
+import { Button, ErrorState, SectionHeader, Skeleton } from '../components/ui.jsx';
 import { Icon } from '../components/Icon.jsx';
 import { SessionCard } from '../components/SessionCard.jsx';
 
@@ -56,44 +58,66 @@ function TravelHop({ hop }) {
 
 export function MyAgendaPage() {
   useDocumentTitle('My Agenda');
-  const { currentUserId, reservationFor, travel } = useConference();
-  const { data: plan, loading } = useFetch(() => api.getSchedule(currentUserId), [currentUserId]);
+  const { currentUserId, reservationFor, reservationsReady, clock, travel } = useConference();
+  const { data, loading, error, reload } = useFetch(() => api.getSchedule(currentUserId), [currentUserId]);
 
-  // The store, not the fetched payload, says what you still hold.
-  const days = (plan?.days ?? [])
-    .map((d) => ({
-      ...d,
-      sessions: d.sessions
-        .map((s) => ({ ...s, reservation: reservationFor(s.id) }))
-        .filter((s) => s.reservation)
-        .sort((a, b) => a.startsAt.localeCompare(b.startsAt) || a.id - b.id),
-    }))
-    .filter((d) => d.sessions.length);
+  const days = data && reservationsReady ? agendaDays(data.days, reservationFor) : [];
 
   return (
     <div className="space-y-8">
       <SectionHeader eyebrow="Your conference" title="My Agenda" />
-      {loading && !plan && <Skeleton className="h-48" />}
-      {!loading && days.length === 0 && (
-        <section className="rounded-2xl border border-dashed border-hairline bg-surface px-6 py-16 text-center" data-testid="agenda-empty">
-          <p className="text-sm text-muted">Nothing booked yet.</p>
-          <Button to="/schedule" size="sm" className="mt-4">Browse the schedule</Button>
+      {error ? (
+        <ErrorState error={error} onRetry={reload} />
+      ) : loading || !reservationsReady ? (
+        <div className="space-y-3"><Skeleton className="h-24" /><Skeleton className="h-24" /></div>
+      ) : days.length === 0 ? (
+        <section
+          className="grid place-items-center rounded-2xl border border-dashed border-hairline bg-surface px-6 py-20 text-center"
+          data-testid="agenda-empty"
+        >
+          <span className="grid size-12 place-items-center rounded-xl bg-violet-500/12 text-violet-300">
+            <Icon name="ticket" className="size-5" />
+          </span>
+          <h2 className="mt-4 font-display text-2xl">Nothing on your agenda yet</h2>
+          <p className="mt-2 max-w-sm text-sm text-muted">
+            Add a session and it takes your seat, or a place in the queue when the room is full.
+          </p>
+          <Button to="/schedule" size="sm" className="mt-6">Browse the schedule</Button>
         </section>
-      )}
-      {days.map((d) => {
-        const hops = new Map(travelHops(d.sessions, travel).map((h) => [h.from.id, h]));
-        return (
+      ) : (
+        days.map((d) => {
+          const hops = new Map(travelHops(d.sessions, travel).map((h) => [h.from.id, h]));
+          return (
           <section key={d.date} data-testid={`agenda-day-${d.date}`} className="space-y-3">
-            <h2 className="font-display text-xl">{dayLabel(d.date)}</h2>
-            {d.sessions.map((s) => (
-              <div key={s.id} className="space-y-3">
-                <SessionCard session={s} variant="row" />
-                {hops.has(s.id) && <TravelHop hop={hops.get(s.id)} />}
+            <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+              <h3 className="font-display text-xl">{dayLabel(d.date)}</h3>
+              <div className="text-sm text-muted">
+                <span data-testid="agenda-day-hours">{hoursLabel(d.totalMinutes)}</span>
+                {d.waitlistedMinutes > 0 && (
+                  <span className="ml-2 font-medium text-amber-300" data-testid="agenda-day-waitlisted">
+                    +{hoursLabel(d.waitlistedMinutes)} waitlisted
+                  </span>
+                )}
               </div>
-            ))}
+            </div>
+            <div className="space-y-2.5">
+              {d.sessions.map((s) => (
+                <div key={s.id} className="space-y-2.5">
+                  <SessionCard
+                    session={s}
+                    variant="row"
+                    attendance={s.reservation === 'confirmed'
+                      ? { ended: hasEnded(s, clock), checkedIn: s.checkedIn, myStars: s.myStars }
+                      : null}
+                  />
+                  {hops.has(s.id) && <TravelHop hop={hops.get(s.id)} />}
+                </div>
+              ))}
+            </div>
           </section>
-        );
-      })}
+          );
+        })
+      )}
     </div>
   );
 }

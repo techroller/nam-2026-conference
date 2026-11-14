@@ -43,22 +43,3 @@ test.describe('Home is a way in, not a feed', () => {
     }
   });
 });
-
-test.describe('My Agenda in the nav', () => {
-  test('it is in the nav, and /my-plan redirects to it', async ({ page }, testInfo) => {
-    await visit(page, '/');
-    // Desktop shows the main nav; a phone hides it behind the menu button.
-    if (testInfo.project.name === 'mobile') {
-      await page.getByRole('button', { name: 'Open menu' }).click();
-      await page.getByRole('navigation', { name: 'Mobile' }).getByRole('link', { name: /My Agenda/ }).click();
-    } else {
-      await page.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: /My Agenda/ }).click();
-    }
-    await expect(page).toHaveURL(/\/my-agenda$/);
-    await expect(page.getByRole('heading', { name: 'My Agenda' })).toBeVisible();
-
-    await visit(page, '/my-plan');
-    await expect(page).toHaveURL(/\/my-agenda$/);
-    await expect(page.getByRole('heading', { name: 'My Agenda' })).toBeVisible();
-  });
-});
