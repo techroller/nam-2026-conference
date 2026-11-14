@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { db } from '../db.js';
-import { SESSION_SELECT, hydrateSessions, toSession, toSpeaker } from '../lib/query.js';
+import { SESSION_SELECT, hydrateSessions, toParty, toSession, toSpeaker } from '../lib/query.js';
 import { seatState } from '../lib/seats.js';
 import { baseUrlFor, sessionCalendar } from '../lib/ical.js';
 
@@ -23,6 +23,15 @@ const alsoInRoom = db.prepare(`${SESSION_SELECT}
 /** Same slot, different room — the "what am I giving up" list. */
 const competingWith = db.prepare(`${SESSION_SELECT}
   WHERE s.day = ? AND s.starts_at = ? AND s.id != ? ORDER BY s.avg_rating DESC LIMIT 6`);
+
+const partyActs = db.prepare('SELECT * FROM party_acts WHERE session_id = ? ORDER BY position');
+const partyDetails = db.prepare('SELECT * FROM party_details WHERE session_id = ?');
+
+/** GET /api/sessions/parties — the Social sessions with line-up, 2-for-1 window and entry details. */
+sessionsRouter.get('/parties', (req, res) => {
+  const rows = db.prepare(`${SESSION_SELECT} WHERE s.format = 'Social' ORDER BY s.day`).all();
+  res.json(rows.map((r) => toParty(r, partyDetails.get(r.id), partyActs.all(r.id))));
+});
 
 /**
  * GET /api/sessions
