@@ -4,6 +4,7 @@ summary: The shared look and chrome — design tokens, primitives in ui.jsx, ico
 read_when: adding a component or page, styling anything, touching the home page, the nav or footer, the attendee switcher, icons, toasts, generated avatars or covers, animation, formatting times/dates/plurals
 files:
   - src/index.css
+  - scripts/hero-art.mjs
   - src/lib/accents.js
   - src/lib/format.js
   - src/lib/useDocumentTitle.js
