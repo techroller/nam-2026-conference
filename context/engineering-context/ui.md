@@ -4,6 +4,7 @@ summary: The shared look and chrome — design tokens, primitives in ui.jsx, ico
 read_when: adding a component or page, styling anything, touching the home page, the nav or footer, the attendee switcher, icons, toasts, generated avatars or covers, animation, formatting times/dates/plurals
 files:
   - src/index.css
+  - scripts/hero-art.mjs
   - src/lib/accents.js
   - src/lib/format.js
   - src/lib/useDocumentTitle.js
@@ -158,13 +159,21 @@ sticky `glass` header, `<main id="main">`, and the footer.
 **`HomePage`** (`/`) — static: nothing on it is about the signed-in attendee or
 what is live. It stacks `HeroBar` (`hero`: name, `conference.dates · city`, a
 `Day n · time` chip from `clock`, and `Browse today` → `/schedule?day=<clock.day>`
-plus `Speakers` buttons) → `QuickLinks` (`quick-links`, a `nav` of the `LINKS`
-array: Schedule, Speakers, Venues, Food & drink, Expo) → `LatestAnnouncement`
+plus `Speakers` buttons; a tall banner over `HeroMedia`, which shows the generated
+Aurora and Foundry art from `scripts/hero-art.mjs` and falls back to the gradient) →
+`About` (`about`: name, edition, dates, city from `conference`, plus the
+hard-written "6.2 miles") → `GettingThere` (`getting-there`: each venue's address and
+`opensAt – closesAt`, then per direction the non-Walk `routesBetween` rows as
+`travel-<from>-<to>-<mode>` with minutes and cost, `Free` at 0, and a link to
+`/venues`) → `ThingsToDoNearby` (`nearby`, `nearby-item`: the static `NEARBY`
+list of six Las Vegas places, a name and a line each — no links, prices, hours
+or distances, which go stale) → `LatestAnnouncement`
 (`announcements`: the single newest posted one, pinned first, filtered by
 `postedAt <= clock`, so nothing appears before it was written) →
 `SponsorMarquee` (venues doc). Sections that return `null` would leave their
 `<Reveal>` wrapper as a gap, so the container has `[&>:empty]:hidden`.
-`tests/home.spec.js` asserts the five links, the announcement cut-off, and that
+`tests/home.spec.js` asserts the welcome (no quick links, hero images and their
+gradient fallback, blurb, getting-there), the things-to-do list, the announcement cut-off, and that
 none of `today-panel`, `live-now`, `speaking-strip`, `followed-sessions`, `next-up`
 is on the page — no component renders those ids; a ticket that puts a personal or
 live section on Home updates that test. A new home section is a component that
@@ -326,7 +335,7 @@ How to test one: `context/engineering-context/testing.md` § Testing a dialog.
 ## Where to change…
 
 - A nav item: `NAV` in `Layout.jsx` (icon must exist in `Icon.jsx`).
-- A link on the home page: `LINKS` in `HomePage.jsx`, and the count in `tests/home.spec.js`.
+- A section on the home page: a component in `HomePage.jsx` wrapped in `<Reveal>`, and a check in `tests/home.spec.js`. Hero art: `node scripts/hero-art.mjs` rewrites `public/images/hero-1.jpg`/`hero-2.jpg`.
 - A footer link: the column array in `Layout`'s footer; add the route first.
 - A new primitive used by more than one page: `ui.jsx`.
 - A new token or utility: `@theme` / `@utility` in `index.css`.
