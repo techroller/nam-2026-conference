@@ -57,7 +57,13 @@ with different minutes; never assume symmetry.
   `reservation`); keeps `'confirmed'` only, sorts by start, pairs each with the next
   confirmed one and returns `[{ from, to, assessment }]` for cross-venue pairs.
   Waitlisted places are skipped, never paired. My Agenda renders each as a
-  `travel-hop` block (agenda doc). `tests/unit/travel.test.js` covers both.
+  `travel-hop` block (agenda doc) after `showsTravelBlock(assessment)`. It still
+  returns every cross-venue pair. `tests/unit/travel.test.js` covers both.
+- `travel.js:showsTravelBlock(assessment)` / `TRAVEL_BLOCK_MAX_GAP = 30` — a
+  hop is shown when `impossible` or `gapMinutes <= 30`. A hop that fits with
+  more than 30 minutes spare shows nothing; a hop that cannot be made always
+  warns, because the warning is what the attendee most needs however much gap
+  there is, so it ignores the 30-minute rule.
 
 **`VenuesPage`** — URL params `venue` (id; defaults to first = primary) and
 `day` (defaults to `clock.day`). Unlike other pages, `set()` never deletes a

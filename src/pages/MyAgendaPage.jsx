@@ -4,7 +4,7 @@ import * as api from '../lib/api.js';
 import { agendaDays, hoursLabel } from '../lib/agenda.js';
 import { hasEnded } from '../lib/clock.js';
 import { dayLabel } from '../lib/format.js';
-import { travelHops } from '../lib/travel.js';
+import { travelHops, showsTravelBlock } from '../lib/travel.js';
 import { useDocumentTitle } from '../lib/useDocumentTitle.js';
 import { Button, ErrorState, SectionHeader, Skeleton } from '../components/ui.jsx';
 import { Icon } from '../components/Icon.jsx';
@@ -86,7 +86,7 @@ export function MyAgendaPage() {
         </section>
       ) : (
         days.map((d) => {
-          const hops = new Map(travelHops(d.sessions, travel).map((h) => [h.from.id, h]));
+          const hops = new Map(travelHops(d.sessions, travel).filter((h) => showsTravelBlock(h.assessment)).map((h) => [h.from.id, h]));
           return (
           <section key={d.date} data-testid={`agenda-day-${d.date}`} className="space-y-3">
             <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">

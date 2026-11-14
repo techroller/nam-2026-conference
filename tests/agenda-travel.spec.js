@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { API, visit, laneFor, bookableFor, momentOn, shotForPR, failOnPageErrors } from './helpers.js';
-import { travelHops } from '../src/lib/travel.js';
+import { travelHops, showsTravelBlock } from '../src/lib/travel.js';
 
 const combos = (items, k, from = 0) => {
   if (k === 0) return [[]];
@@ -22,14 +22,17 @@ test.describe('My Agenda travel between venues', () => {
 
     // What the page must show for a set of confirmed seats: the unit-tested pairing rule.
     const hopsFor = (mine) => travelHops([...held, ...mine.map((s) => ({ ...s, reservation: 'confirmed' }))], travel);
+    const shownHops = (mine) => hopsFor(mine).filter((h) => showsTravelBlock(h.assessment));
     const flags = (hops) => hops.map((h) => [h.from.title, String(h.assessment.impossible)]);
 
-    // Free sessions that make at least one warning and one hop that fits, preferring four
+    // Free sessions that make a warning, a tight hop that fits and a roomy hop (hidden), preferring four
     // so two of them can sit at the same site.
     const mine = [4, 3].flatMap((k) => combos(open, k)).find((set) => {
       if (set.some((x, i) => i && x.startsAt < set[i - 1].endsAt)) return false;
       const hops = hopsFor(set);
-      return hops.some((h) => h.assessment.impossible) && hops.some((h) => !h.assessment.impossible);
+      return hops.some((h) => h.assessment.impossible)
+        && hops.some((h) => !h.assessment.impossible && showsTravelBlock(h.assessment))
+        && hops.some((h) => !h.assessment.impossible && !showsTravelBlock(h.assessment));
     });
     expect(mine, 'the seed leaves free sessions that make a tight hop and a roomy one on this day').toBeTruthy();
 
@@ -47,8 +50,10 @@ test.describe('My Agenda travel between venues', () => {
         e.parentElement.querySelector('h3').textContent, e.getAttribute('data-impossible')]));
 
       // one hop per cross-venue pair of confirmed seats, after its first row; same-venue pairs have none
-      const expected = hopsFor(mine);
+      // (a hop that can be made with over 30 minutes to spare has no block)
+      const expected = shownHops(mine);
       await expect.poll(shown).toEqual(flags(expected));
+      expect(hopsFor(mine).length).toBeGreaterThan(expected.length);
 
       const bad = expected.find((h) => h.assessment.impossible);
       const good = expected.find((h) => !h.assessment.impossible);
@@ -69,7 +74,7 @@ test.describe('My Agenda travel between venues', () => {
       await day.getByTestId('session-card').filter({ hasText: bad.from.title })
         .getByRole('button', { name: 'Remove from my agenda' }).click();
       const rest = mine.filter((s) => s.id !== bad.from.id);
-      await expect.poll(shown).toEqual(flags(hopsFor(rest)));
+      await expect.poll(shown).toEqual(flags(shownHops(rest)));
       expect(await page.evaluate(() => window.__noReload)).toBe(true);
       expect(errors).toEqual([]);
     } finally {
