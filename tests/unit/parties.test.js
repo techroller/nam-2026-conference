@@ -68,8 +68,8 @@ describe('travelIn', () => {
   ];
 
   test('the fastest non-Walk row from the other venue', () => {
-    assert.equal(travelIn(travel, { venue: { id: 2 } }, 1).mode, 'Rideshare');
-    assert.equal(travelIn(travel, { venue: { id: 1 } }, 2).minutes, 27);
+    assert.equal(travelIn(travel, { venue: { id: 2 } }).mode, 'Rideshare');
+    assert.equal(travelIn(travel, { venue: { id: 1 } }).minutes, 27);
   });
 
   test('null when there is no route', () => {
