@@ -13,6 +13,7 @@ const NAV = [
   { to: '/speakers', label: 'Speakers', icon: 'users' },
   { to: '/my-agenda', label: 'My Agenda', icon: 'ticket' },
   { to: '/venues', label: 'Venues', icon: 'building' },
+  { to: '/parties', label: 'Parties', icon: 'sparkle' },
   { to: '/food', label: 'Food', icon: 'food' },
   { to: '/expo', label: 'Expo', icon: 'grid' },
 ];

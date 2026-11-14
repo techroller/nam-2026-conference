@@ -22,6 +22,8 @@ files:
   - src/components/UserSwitcher.jsx
   - src/components/RouteChange.jsx
   - src/pages/HomePage.jsx
+  - src/pages/PartiesPage.jsx
+  - src/lib/parties.js
   - src/pages/NotFoundPage.jsx
   - src/pages/PresentationPage.jsx
   - src/pages/ProductPresentationPage.jsx
@@ -31,6 +33,8 @@ files:
   - public/brand/
 tests:
   - tests/unit/format.test.js
+  - tests/unit/parties.test.js
+  - tests/parties.spec.js
   - tests/unit/presentation.test.js
   - tests/unit/deck-contrast.test.js
   - tests/smoke.spec.js
@@ -344,3 +348,16 @@ How to test one: `context/engineering-context/testing.md` § Testing a dialog.
   its `Scene`; a new chapter: an entry in that talk's chapter list —
   `components/presentation/chapters.js` (engineering), `presentation/product/chapters.js` (product)
   or `presentation/opening/chapters.js` (opening).
+
+## Parties page
+
+`/parties` (nav entry after Venues, `sparkle` icon) lists the four parties from
+`api.getParties` (`GET /sessions/parties`) under `dayLabel(day)` headings. Each
+`party-<id>` card shows the venue, a `VenueRouteMap`, the line-up (`party-act`),
+the drinks window (`party-two-for-one-window`), entry notes (`party-entry`), the
+fastest non-Walk way in and the last shuttle (`party-shuttle`) and an Add to
+calendar link — no seat control. `partyStatus(party, clock)` in `src/lib/parties.js`
+drives three badges only on the party's own day: `party-badge-two-for-one`,
+`party-badge-now-playing`, `party-badge-up-next` (sets and the window are on from
+their start minute, off at their end minute). `travelIn(travel, party)` picks the
+fastest non-Walk row into the party's venue.
