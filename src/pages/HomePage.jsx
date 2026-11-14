@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { useConference, useFetch } from '../lib/store.jsx';
 import { useDocumentTitle } from '../lib/useDocumentTitle.js';
 import * as api from '../lib/api.js';
+import { routesBetween } from '../lib/travel.js';
 import { relativeDate, time as fmtTime } from '../lib/format.js';
 import { SponsorMarquee } from '../components/SponsorMarquee.jsx';
 import { Reveal } from '../components/Reveal.jsx';
@@ -10,12 +11,9 @@ import { Button, Chip, cx } from '../components/ui.jsx';
 import { Icon } from '../components/Icon.jsx';
 
 /**
- * A slim bar, not a brochure.
- *
- * The page used to open with a marketing headline, four vanity stats and a
- * "programme at a glance" panel — 592px desktop and over a full screen on a
- * phone, none of it about the person holding the phone, all of it known before
- * they bought a ticket.
+ * A banner over generated art of the two venues (a gradient if the images do
+ * not load). It names the conference; the welcome and the way between the
+ * venues sit under it. Nothing in it is about the signed-in attendee.
  */
 function HeroBar({ conference }) {
   const { clock, days } = useConference();
@@ -26,12 +24,12 @@ function HeroBar({ conference }) {
       <HeroMedia />
       <div className="absolute inset-0 bg-[radial-gradient(30rem_14rem_at_12%_0%,rgba(139,92,246,0.22),transparent_65%)]" />
 
-      <div className="relative flex flex-wrap items-center gap-x-5 gap-y-3 px-5 py-4 sm:px-7 sm:py-5">
+      <div className="relative flex flex-wrap items-center gap-x-5 gap-y-3 content-end min-h-[16rem] px-5 py-6 sm:min-h-[22rem] sm:px-8 sm:py-8">
         <div className="min-w-0">
-          <h1 className="font-display text-2xl leading-none tracking-tight sm:text-3xl">
+          <h1 className="font-display text-4xl leading-none tracking-tight sm:text-6xl">
             {conference.name} <span className="text-muted">{conference.edition}</span>
           </h1>
-          <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.16em] text-faint">
+          <p className="mt-2 font-mono text-xs uppercase tracking-[0.16em] text-muted">
             {conference.dates} · {conference.city}
           </p>
         </div>
@@ -54,35 +52,68 @@ function HeroBar({ conference }) {
   );
 }
 
-/** The main pages, one tap each — a way in, not a feed. */
-const LINKS = [
-  { to: '/schedule', label: 'Schedule', blurb: 'Every session, by day, room and track', icon: 'calendar' },
-  { to: '/speakers', label: 'Speakers', blurb: 'Who is on stage, A to Z', icon: 'users' },
-  { to: '/venues', label: 'Venues', blurb: 'Both sites, their rooms and getting between them', icon: 'building' },
-  { to: '/food', label: 'Food & drink', blurb: 'What is open, and where', icon: 'food' },
-  { to: '/expo', label: 'Expo', blurb: 'Partners and sponsors', icon: 'grid' },
-];
-
-function QuickLinks() {
+/** What the conference is, in a sentence or two — all of it from the data. */
+function About({ conference }) {
+  const { venues } = useConference();
   return (
-    <nav aria-label="Explore the conference" data-testid="quick-links">
-      <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {LINKS.map((l) => (
-          <li key={l.to}>
-            <Link to={l.to}
-              className="group flex items-start gap-3 rounded-xl border border-hairline bg-surface p-4 transition-colors hover:border-white/20 hover:bg-raised">
-              <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-violet-500/12 text-violet-300">
-                <Icon name={l.icon} className="size-4" />
-              </span>
-              <span className="min-w-0">
-                <span className="block font-semibold group-hover:text-violet-200">{l.label}</span>
-                <span className="block text-[13px] text-muted">{l.blurb}</span>
-              </span>
-            </Link>
+    <section data-testid="about" className="max-w-3xl">
+      <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-faint">About</p>
+      <h2 className="mt-1 font-display text-xl sm:text-2xl">
+        Welcome to {conference.name} {conference.edition}
+      </h2>
+      <p className="mt-2 text-[15px] leading-relaxed text-muted">
+        {conference.name} {conference.edition} runs {conference.dates} in {conference.city}. The programme
+        is split across {venues.length === 2 ? 'two venues' : `${venues.length} venues`} 6.2 miles apart,
+        so plan the journey between them as well as your day.
+      </p>
+    </section>
+  );
+}
+
+const cost = (usd) => (usd === 0 ? 'Free' : `$${usd}`);
+
+/** Each venue's address and hours, how to get between them, and where the rest lives. */
+function GettingThere() {
+  const { venues, travel } = useConference();
+  if (!venues.length) return null;
+  const pairs = venues.length === 2 ? [[venues[0], venues[1]], [venues[1], venues[0]]] : [];
+
+  return (
+    <section data-testid="getting-there" className="space-y-4">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <h2 className="font-display text-xl sm:text-2xl">Getting there</h2>
+        <Link to="/venues" className="text-sm font-semibold text-violet-300 hover:text-violet-200">
+          Venues and rooms <Icon name="arrowRight" className="inline size-3.5" />
+        </Link>
+      </div>
+
+      <ul className="grid gap-3 sm:grid-cols-2">
+        {venues.map((v) => (
+          <li key={v.id} className="card p-4">
+            <h3 className="font-semibold">{v.name}</h3>
+            <p className="mt-1 text-[13px] text-muted">{v.address}</p>
+            <p className="mt-0.5 text-[13px] text-faint">Open {fmtTime(v.opensAt)} – {fmtTime(v.closesAt)}</p>
           </li>
         ))}
       </ul>
-    </nav>
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        {pairs.map(([from, to]) => (
+          <div key={`${from.id}-${to.id}`} className="card p-4">
+            <h3 className="text-sm font-semibold">{from.shortName} to {to.shortName}</h3>
+            <ul className="mt-2 divide-y divide-hairline text-[13px]">
+              {routesBetween(travel, from.id, to.id).filter((t) => t.mode !== 'Walk').map((t) => (
+                <li key={t.mode} data-testid={`travel-${from.id}-${to.id}-${t.mode}`}
+                  className="flex items-center justify-between gap-3 py-1.5">
+                  <span>{t.mode}</span>
+                  <span className="text-muted">{t.minutes} min · {cost(t.costUsd)}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -162,7 +193,8 @@ export function HomePage() {
     // each one leaves a blank gap in the stack.
     <div className="space-y-8 [&>:empty]:hidden">
       <HeroBar conference={conference} />
-      <QuickLinks />
+      <Reveal><About conference={conference} /></Reveal>
+      <Reveal><GettingThere /></Reveal>
       <Reveal><ThingsToDoNearby /></Reveal>
       <Reveal><LatestAnnouncement /></Reveal>
       <SponsorMarquee />

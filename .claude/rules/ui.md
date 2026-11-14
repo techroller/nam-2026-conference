@@ -70,7 +70,7 @@ in each room instead.
 
 ## Home and My Agenda are blank on purpose
 
-`/` is a way in — hero, links, the latest announcement, sponsors — and
+`/` is a welcome — venue hero, an about blurb, getting between the venues, the latest announcement, sponsors — and
 `/my-agenda` is a *coming soon* placeholder. Personal views are what workshop
 teams build; build one when a ticket asks for it. When you do:
 
