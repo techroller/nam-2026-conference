@@ -159,7 +159,9 @@ sticky `glass` header, `<main id="main">`, and the footer.
 what is live. It stacks `HeroBar` (`hero`: name, `conference.dates · city`, a
 `Day n · time` chip from `clock`, and `Browse today` → `/schedule?day=<clock.day>`
 plus `Speakers` buttons) → `QuickLinks` (`quick-links`, a `nav` of the `LINKS`
-array: Schedule, Speakers, Venues, Food & drink, Expo) → `LatestAnnouncement`
+array: Schedule, Speakers, Venues, Food & drink, Expo) → `ThingsToDoNearby`
+(`nearby`, `nearby-item`: the static `NEARBY` list of six Las Vegas places, a name
+and a line each — no links, prices, hours or distances, which go stale) → `LatestAnnouncement`
 (`announcements`: the single newest posted one, pinned first, filtered by
 `postedAt <= clock`, so nothing appears before it was written) →
 `SponsorMarquee` (venues doc). Sections that return `null` would leave their
