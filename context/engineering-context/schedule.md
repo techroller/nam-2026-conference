@@ -13,6 +13,7 @@ tests:
   - tests/schedule.spec.js
   - tests/session.spec.js
   - tests/api/track-filter.test.js
+  - tests/api/parties.test.js
 related: [seats, attendance, agenda, venues, speakers, ui, clock]
 ---
 
@@ -43,6 +44,12 @@ and a bound `?` to `args`:
 Result is `hydrateSessions(...)` (speakers + tags). To add a filter: one `if`
 here, then pass it through `api.getSessions(filters)`; `qs()` in `src/lib/api.js`
 drops `'all'`, `''`, null.
+
+**`GET /api/sessions/parties`** (registered before `/:id`; `getParties()` in `api.js`)
+returns the four Social sessions by day, each `toSession` plus `lineup[{band,startsAt,endsAt}]`,
+`twoForOne{startsAt,endsAt}`, `entry{badgeRequired,plusOnes,minAge}` and
+`lastShuttle{time,toVenueId}` (via `toParty`). Times are HH:MM; Foundry's last shuttle
+(01:15) falls after midnight, past its end. Parties stay info only: no seat, no RSVP.
 
 **`GET /api/sessions/:id`** returns `toSession(row, { speakers, tags })` plus
 `seats` (`seatState(id, ?userId)` from `server/lib/seats.js`), `reviews` (ratings

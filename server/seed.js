@@ -465,6 +465,10 @@ DAYS.forEach((day, dayIdx) => {
 });
 
 /* social events at the two party rooms */
+const partyIds = new Map();
+const actStmt = prep('INSERT INTO party_acts (session_id,position,band,starts_at,ends_at) VALUES (?,?,?,?,?)');
+const detailStmt = prep(`INSERT INTO party_details (session_id,two_for_one_starts,two_for_one_ends,badge_required,plus_ones,min_age,last_shuttle_at,last_shuttle_to_venue_id)
+  VALUES (?,?,?,?,?,?,?,?)`);
 const terrace = rooms.find((r) => r.name === 'Desert Terrace');
 const smelter = rooms.find((r) => r.name === 'The Smelter');
 [
@@ -473,11 +477,30 @@ const smelter = rooms.find((r) => r.name === 'The Smelter');
   ['The Foundry Block Party', smelter, DAYS[2], '19:00', '23:30', 'Live music in the yard, food trucks, and the hardware demos left running late. The yard stays open after it wraps; last shuttle back to Aurora is 01:15.'],
   ['Closing Party', terrace, DAYS[3], '18:30', '23:00', 'The one where everyone swaps notes on what they are actually going to build. Cocktails and a very serious taco situation.'],
 ].forEach(([title, room, day, start, end, abstract]) => {
-  addSession({
+  const id = addSession({
     title, subtitle: 'Social event', abstract, track: trackBy['AI Product & Strategy'],
     room, day, start, end, format: 'Social', level: 'All Levels',
     seats: Math.round(room.capacity * flt(0.6, 0.95, 2)), recorded: false,
   });
+  partyIds.set(title, { id, room });
+});
+
+/* each party's line-up, 2-for-1 window and entry notes — times of day, the day comes from the session */
+const PLUS_ONES = {
+  'Opening Night Reception': 'One plus-one per badge, signed in at the door.',
+  'Speakers & First-Timers Mixer': 'Badge holders only; no plus-ones.',
+  'The Foundry Block Party': 'One plus-one per badge; they must be 21 or over.',
+  'Closing Party': 'One plus-one per badge, signed in at the door.',
+};
+[
+  ['Opening Night Reception', [['The Lanyard Quartet', '19:15', '20:00'], ['Soft Launch', '20:15', '21:00'], ['Minor Incident Report', '21:15', '21:55']], ['19:00', '20:00'], '22:30'],
+  ['Speakers & First-Timers Mixer', [['Cold Open Trio', '18:45', '19:20'], ['The Quiet Standup', '19:30', '20:15']], ['18:30', '19:30'], '21:00'],
+  ['The Foundry Block Party', [['Hot Reload', '19:30', '20:30'], ['Brownout', '20:45', '21:45'], ['Yard Sale of Sound', '22:00', '23:20']], ['19:00', '20:30'], '01:15'],
+  ['Closing Party', [['Retro Spective', '19:00', '19:50'], ['Ship It Friday', '20:05', '21:05'], ['Merge Conflict', '21:20', '22:50']], ['18:30', '19:30'], '23:30'],
+].forEach(([title, acts, [promoFrom, promoTo], shuttle]) => {
+  const { id, room } = partyIds.get(title);
+  acts.forEach(([band, from, to], i) => actStmt.run(id, i + 1, band, from, to));
+  detailStmt.run(id, promoFrom, promoTo, 1, PLUS_ONES[title], 21, shuttle, venues.find((v) => v.id !== room.venue_id).id);
 });
 
 /**

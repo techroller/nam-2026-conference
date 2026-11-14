@@ -37,6 +37,8 @@ Approximate counts from a fresh seed. The tables attendees write to drift as you
 | `check_ins` | ~10, grows | Proof of attendance; gates rating. Seeded only for Day 1's morning |
 | `vendors` | 24 | Food and drink at both venues, with opening hours and wait times |
 | `sponsors` | 28 | Five tiers, booth numbers, perks |
+| `party_acts` | 11 | A Social session's band line-up: position, band, set start/end (HH:MM) |
+| `party_details` | 4 | One row per party: 2-for-1 window, badge/plus-ones/min age, last shuttle time and the venue it goes to |
 | `announcements` | 10 | Two are pinned. Home shows the latest one already posted at the clock's time |
 
 ## The two-venue split

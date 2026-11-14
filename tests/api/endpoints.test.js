@@ -54,6 +54,7 @@ function readable() {
     '/announcements',
     `/live?day=${days[0]}&time=11:00`,
     '/sessions',
+    '/sessions/parties',
     '/speakers',
     '/users',
     `/sessions/${ids.session}`,
@@ -185,7 +186,7 @@ describe('Every endpoint answers', () => {
     const covered = [
       'GET meta/bootstrap', 'GET meta/venues', 'GET meta/vendors', 'GET meta/sponsors',
       'GET meta/announcements', 'GET meta/live',
-      'GET sessions/', 'GET sessions/:id', 'GET sessions/:id.ics',
+      'GET sessions/', 'GET sessions/parties', 'GET sessions/:id', 'GET sessions/:id.ics',
       'GET speakers/', 'GET speakers/:id',
       'GET users/', 'GET users/:id', 'GET users/:id/today', 'GET users/:id/schedule',
       'GET users/:id/agenda.ics', 'GET users/:id/attendance/:sessionId',
