@@ -72,7 +72,10 @@ data at the end of the script, or draw from a separate generator.
     gets a check-in at its start time; ~70% of those also get a rating (2–5 stars, optional
     comment). Then `sessions.avg_rating/rating_count` and `speakers.avg_rating` are
     recomputed from `ratings`. Nothing outside Day 1 morning is checked in or rated.
-12. Vendors, sponsors (website `https://<slug>.example.com` — stored, never rendered), and
+12. Party details: after the four Social sessions, `party_acts` (hand-written bands, sets
+    inside the party's hours) and `party_details` (2-for-1 window, entry notes, last shuttle to
+    the other venue; Foundry's is 01:15). Times of day only — no PRNG, no dates.
+13. Vendors, sponsors (website `https://<slug>.example.com` — stored, never rendered), and
     `ANN` announcements, whose dates and weekdays come from `DAYS` via `weekdayOf`.
 
 **Dates.** `START_DATE = ORBIT_START_DATE ?? isoDay(new Date())` — local calendar date, not

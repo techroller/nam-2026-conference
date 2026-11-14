@@ -62,3 +62,5 @@ export const sessionCalendarUrl = (sessionId) => `/api/sessions/${sessionId}.ics
 
 export const followSpeaker = (userId, speakerId) => api(`/users/${userId}/follows/${speakerId}`, { method: 'PUT' });
 export const unfollowSpeaker = (userId, speakerId) => api(`/users/${userId}/follows/${speakerId}`, { method: 'DELETE' });
+
+export const getParties = () => api('/sessions/parties');

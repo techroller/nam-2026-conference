@@ -66,3 +66,15 @@ export function travelHops(sessions, travel) {
   }
   return hops;
 }
+
+/** A can-be-made hop only earns a block on My Agenda when the gap is this tight. */
+export const TRAVEL_BLOCK_MAX_GAP = 30;
+
+/**
+ * Whether My Agenda shows a hop's travel block. A hop that cannot be made
+ * always warns, whatever the gap; one that can be made is only worth a block
+ * when there is little slack.
+ */
+export function showsTravelBlock(assessment) {
+  return assessment.impossible || assessment.gapMinutes <= TRAVEL_BLOCK_MAX_GAP;
+}
