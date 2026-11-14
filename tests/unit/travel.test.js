@@ -1,6 +1,6 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
-import { routesBetween, assessTravel, travelHops } from '../../src/lib/travel.js';
+import { routesBetween, assessTravel, travelHops, showsTravelBlock, TRAVEL_BLOCK_MAX_GAP } from '../../src/lib/travel.js';
 
 const AURORA = 1;
 const FOUNDRY = 2;
@@ -143,5 +143,29 @@ describe('Hops between consecutive confirmed seats', () => {
     const hops = travelHops([a, queued, c], travel);
     assert.deepEqual(hops.map((h) => [h.from.id, h.to.id]), [[1, 3]]);
     assert.equal(hops[0].assessment.gapMinutes, 120);
+  });
+});
+
+describe('Which hops earn a travel block', () => {
+  const hop = (gapMinutes, walk = 0) => assessTravel({ travel, from: at(AURORA), to: at(FOUNDRY, walk), gapMinutes });
+
+  test('the cut-off is 30 minutes', () => {
+    assert.equal(TRAVEL_BLOCK_MAX_GAP, 30);
+  });
+
+  test('a hop that can be made with 30 minutes or less to spare is shown', () => {
+    assert.equal(showsTravelBlock(hop(30)), true);
+    assert.equal(showsTravelBlock(hop(15)), true);
+  });
+
+  test('a hop that can be made with more than 30 minutes to spare is hidden', () => {
+    assert.equal(showsTravelBlock(hop(31)), false);
+    assert.equal(showsTravelBlock(hop(90)), false);
+  });
+
+  test('a hop that cannot be made is shown whatever the gap', () => {
+    const a = hop(31, 16); // quickest is rideshare 16 + walk 16 = 32
+    assert.equal(a.impossible, true);
+    assert.equal(showsTravelBlock(a), true);
   });
 });
