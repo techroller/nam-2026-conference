@@ -82,4 +82,29 @@ test.describe('Home welcomes you, and is not a feed', () => {
       expect(shown, `"${a.title}" was posted later than the clock`).not.toContain(a.title);
     }
   });
+
+  test('things to do nearby: real places, one line each, nothing that goes stale', async ({ page }) => {
+    await visit(page, '/');
+    const section = page.getByTestId('nearby');
+    await expect(section).toBeVisible();
+    await expect(section.getByRole('heading', { name: 'Things to do nearby' })).toBeVisible();
+
+    const items = section.getByTestId('nearby-item');
+    expect(await items.count()).toBeGreaterThanOrEqual(4);
+    for (const text of await items.allInnerTexts()) {
+      const [name, line] = text.split('\n').map((t) => t.trim()).filter(Boolean);
+      expect(name, 'a name').toBeTruthy();
+      expect(line, `a line under ${name}`).toBeTruthy();
+    }
+
+    await expect(section.locator('a')).toHaveCount(0);
+    const text = await section.innerText();
+    for (const re of [/\$\d/, /\d\s?(am|pm)/i, /\d{1,2}:\d{2}/, /open|daily/i]) {
+      expect(text, `${re} would go stale`).not.toMatch(re);
+    }
+
+    expect(await section.evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true);
+    await section.scrollIntoViewIfNeeded();
+    await shotForPR(page, 'Things to do nearby on Home');
+  });
 });

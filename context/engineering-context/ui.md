@@ -165,13 +165,15 @@ Aurora and Foundry art from `scripts/hero-art.mjs` and falls back to the gradien
 hard-written "6.2 miles") → `GettingThere` (`getting-there`: each venue's address and
 `opensAt – closesAt`, then per direction the non-Walk `routesBetween` rows as
 `travel-<from>-<to>-<mode>` with minutes and cost, `Free` at 0, and a link to
-`/venues`) → `LatestAnnouncement`
+`/venues`) → `ThingsToDoNearby` (`nearby`, `nearby-item`: the static `NEARBY`
+list of six Las Vegas places, a name and a line each — no links, prices, hours
+or distances, which go stale) → `LatestAnnouncement`
 (`announcements`: the single newest posted one, pinned first, filtered by
 `postedAt <= clock`, so nothing appears before it was written) →
 `SponsorMarquee` (venues doc). Sections that return `null` would leave their
 `<Reveal>` wrapper as a gap, so the container has `[&>:empty]:hidden`.
 `tests/home.spec.js` asserts the welcome (no quick links, hero images and their
-gradient fallback, blurb, getting-there), the announcement cut-off, and that
+gradient fallback, blurb, getting-there), the things-to-do list, the announcement cut-off, and that
 none of `today-panel`, `live-now`, `speaking-strip`, `followed-sessions`, `next-up`
 is on the page — no component renders those ids; a ticket that puts a personal or
 live section on Home updates that test. A new home section is a component that

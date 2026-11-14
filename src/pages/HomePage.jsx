@@ -117,6 +117,32 @@ function GettingThere() {
   );
 }
 
+/** Real places only, one line each. No links, prices, hours or distances: all of it goes stale. */
+const NEARBY = [
+  { name: 'The Strip', blurb: 'Las Vegas Boulevard, lined with resorts, casinos and street-level spectacle.' },
+  { name: 'Fremont Street', blurb: 'The old downtown, under a canopy of lights in the Fremont Street Experience.' },
+  { name: 'Red Rock Canyon', blurb: 'Sandstone cliffs and desert trails on the western edge of the valley.' },
+  { name: 'The Neon Museum', blurb: 'A yard of retired Las Vegas signs, rescued and restored.' },
+  { name: 'Bellagio Fountains', blurb: 'Water choreographed to music across the resort lake.' },
+  { name: 'Hoover Dam', blurb: 'The 1930s concrete arch dam holding back Lake Mead on the Colorado River.' },
+];
+
+function ThingsToDoNearby() {
+  return (
+    <section data-testid="nearby" aria-labelledby="nearby-title">
+      <h2 id="nearby-title" className="mb-3 font-display text-xl tracking-tight">Things to do nearby</h2>
+      <ul className="grid gap-3 sm:grid-cols-2">
+        {NEARBY.map((p) => (
+          <li key={p.name} data-testid="nearby-item" className="rounded-xl border border-hairline bg-surface p-4">
+            <span className="block font-semibold">{p.name}</span>
+            <span className="block text-[13px] text-muted">{p.blurb}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
 /**
  * One announcement, and only one that has actually been posted.
  *
@@ -169,6 +195,7 @@ export function HomePage() {
       <HeroBar conference={conference} />
       <Reveal><About conference={conference} /></Reveal>
       <Reveal><GettingThere /></Reveal>
+      <Reveal><ThingsToDoNearby /></Reveal>
       <Reveal><LatestAnnouncement /></Reveal>
       <SponsorMarquee />
     </div>
