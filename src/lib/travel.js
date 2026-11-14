@@ -1,3 +1,5 @@
+import { toMinutes } from './clock.js';
+
 /**
  * Travel-time helpers for a conference spread across two sites.
  *
@@ -42,4 +44,25 @@ export function assessTravel({ travel, from, to, gapMinutes }) {
     impossible: options.every((o) => !o.fits),
     freeTooSlow: Boolean(free && !free.fits && options.some((o) => o.fits)),
   };
+}
+
+/**
+ * The cross-venue hops in one day's sessions: each confirmed seat paired with
+ * the next confirmed seat (waitlist places are not a promise, so they are
+ * skipped), kept when the two sit at different venues. `assessment` is
+ * `assessTravel`'s answer for the gap between them.
+ */
+export function travelHops(sessions, travel) {
+  const held = sessions
+    .filter((s) => s.reservation === 'confirmed')
+    .sort((a, b) => a.startsAt.localeCompare(b.startsAt) || a.id - b.id);
+  const hops = [];
+  for (let i = 0; i < held.length - 1; i++) {
+    const from = held[i];
+    const to = held[i + 1];
+    const gapMinutes = toMinutes(to.startsAt) - toMinutes(from.endsAt);
+    const assessment = assessTravel({ travel, from, to, gapMinutes });
+    if (assessment) hops.push({ from, to, assessment });
+  }
+  return hops;
 }

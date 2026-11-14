@@ -113,10 +113,10 @@ describe('Whether you can make the next session', () => {
 describe('Hops between consecutive confirmed seats', () => {
   const sess = (id, venueId, startsAt, endsAt, reservation = 'confirmed') =>
     ({ id, venue: { id: venueId }, room: { walkMinutes: 5 }, startsAt, endsAt, reservation });
-  const a = sess(1, AURORA, '2026-01-01T09:00', '2026-01-01T10:00');
+  const a = sess(1, AURORA, '09:00', '10:00');
 
   test('a cross-venue pair too close together is flagged with the gap and the fastest total', () => {
-    const b = sess(2, FOUNDRY, '2026-01-01T10:15', '2026-01-01T11:00');
+    const b = sess(2, FOUNDRY, '10:15', '11:00');
     const [hop] = travelHops([b, a], travel);
     assert.equal(hop.from.id, 1);
     assert.equal(hop.to.id, 2);
@@ -126,20 +126,20 @@ describe('Hops between consecutive confirmed seats', () => {
   });
 
   test('a cross-venue pair with enough time is still a hop, but not impossible', () => {
-    const b = sess(2, FOUNDRY, '2026-01-01T11:00', '2026-01-01T12:00');
+    const b = sess(2, FOUNDRY, '11:00', '12:00');
     const hops = travelHops([a, b], travel);
     assert.equal(hops.length, 1);
     assert.equal(hops[0].assessment.impossible, false);
   });
 
   test('consecutive seats at the same venue give no hop', () => {
-    assert.deepEqual(travelHops([a, sess(2, AURORA, '2026-01-01T10:15', '2026-01-01T11:00')], travel), []);
+    assert.deepEqual(travelHops([a, sess(2, AURORA, '10:15', '11:00')], travel), []);
   });
 
   test('a waitlisted session is ignored, and the pair is the next confirmed seat', () => {
-    const queued = sess(2, FOUNDRY, '2026-01-01T10:15', '2026-01-01T11:00', 'waitlisted');
+    const queued = sess(2, FOUNDRY, '10:15', '11:00', 'waitlisted');
     assert.deepEqual(travelHops([a, queued], travel), []);
-    const c = sess(3, FOUNDRY, '2026-01-01T12:00', '2026-01-01T13:00');
+    const c = sess(3, FOUNDRY, '12:00', '13:00');
     const hops = travelHops([a, queued, c], travel);
     assert.deepEqual(hops.map((h) => [h.from.id, h.to.id]), [[1, 3]]);
     assert.equal(hops[0].assessment.gapMinutes, 120);
