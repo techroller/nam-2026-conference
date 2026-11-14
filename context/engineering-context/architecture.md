@@ -94,7 +94,7 @@ the routes. `/opening-presentation`, `/product-presentation` and `/engineering-p
 `levels`, `cuisines`) and adds: `ready`, `error`, `clock` (from `useConferenceClock(days)`),
 `currentUser`, `currentUserId`, `setCurrentUserId`; follows — `followingIds`,
 `isFollowing(id)`, `toggleFollow(id)`; seats — `reservations` (Map sessionId →
-`'confirmed'|'waitlisted'`), `reservationFor(id)`, `onAgenda(id)`, `seatCounts`,
+`'confirmed'|'waitlisted'`), `reservationsReady` (false until `GET /users/:id` has answered), `reservationFor(id)`, `onAgenda(id)`, `seatCounts`,
 `seatsFor(id)`, `reserveSeat`, `releaseSeat`, `toggleSeat`, `conflict`,
 `resolveConflict(swap)`; lookups — `trackBySlug`, `venueById`, `roomById`.
 Changing `currentUserId` writes `orbit:currentUserId`, clears follows/reservations, then
