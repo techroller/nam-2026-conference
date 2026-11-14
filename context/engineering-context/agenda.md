@@ -23,7 +23,7 @@ related: [seats, attendance, clock, venues, schedule, speakers, ui]
 `/my-plan` redirects there) fetches `api.getSchedule` and shows one section per day
 (`agenda-day-<date>`), each with `agenda-day-hours` (confirmed time) and, when there is
 a queue, `agenda-day-waitlisted` (`+1h waitlisted`), then the day's sessions as
-`SessionCard variant="row"` in time order, with a `TravelHop` (`travel-hop`) between confirmed seats at different venues (`src/lib/travel.js:travelHops`) — a waitlisted row carries the card's
+`SessionCard variant="row"` in time order, with a `TravelHop` (`travel-hop`) between confirmed seats at different venues (`src/lib/travel.js:travelHops`), shown only when `showsTravelBlock` says so: a gap of `TRAVEL_BLOCK_MAX_GAP` (30) minutes or less, or a hop that cannot be made at any gap (a roomy hop that fits is noise; the warning must not depend on slack) — a waitlisted row carries the card's
 `Waitlisted` label and the row's seat button leaves it. With nothing booked it shows
 `agenda-empty` and a link to `/schedule`. The derivation is the pure
 `src/lib/agenda.js:agendaDays` (re-filter through the store, sort, recompute both
