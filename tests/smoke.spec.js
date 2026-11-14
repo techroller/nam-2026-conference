@@ -13,6 +13,7 @@ const ROUTES = [
   { path: '/speakers', name: 'Speakers', heading: /^Speakers$/i },
   { path: '/my-agenda', name: 'My Agenda', heading: /agenda$/i },
   { path: '/venues', name: 'Venues', heading: /Venues & stages/i },
+  { path: '/parties', name: 'Parties', heading: /^Parties$/ },
   { path: '/food', name: 'Food', heading: /Food & drink/i },
   { path: '/expo', name: 'Expo', heading: /Partners & sponsors/i },
   { path: '/code-of-conduct', name: 'Code of conduct', heading: /Code of conduct/i },

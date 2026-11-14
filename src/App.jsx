@@ -10,6 +10,7 @@ import { SpeakersPage } from './pages/SpeakersPage.jsx';
 import { SpeakerPage } from './pages/SpeakerPage.jsx';
 import { MyAgendaPage } from './pages/MyAgendaPage.jsx';
 import { VenuesPage } from './pages/VenuesPage.jsx';
+import { PartiesPage } from './pages/PartiesPage.jsx';
 import { FoodPage } from './pages/FoodPage.jsx';
 import { ExpoPage } from './pages/ExpoPage.jsx';
 import { CodeOfConductPage } from './pages/CodeOfConductPage.jsx';
@@ -47,6 +48,7 @@ export function App() {
         {/* the page was called My Plan until seats became the only action */}
         <Route path="my-plan" element={<Navigate to="/my-agenda" replace />} />
         <Route path="venues" element={<VenuesPage />} />
+        <Route path="parties" element={<PartiesPage />} />
         <Route path="food" element={<FoodPage />} />
         <Route path="expo" element={<ExpoPage />} />
         <Route path="code-of-conduct" element={<CodeOfConductPage />} />
