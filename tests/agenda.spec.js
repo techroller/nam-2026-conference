@@ -14,20 +14,21 @@ test.describe('My Agenda', () => {
   test('lists booked sessions by day in time order, keeps hours honest, follows removals, and has an empty state', async ({ page, request }, testInfo) => {
     const errors = failOnPageErrors(page);
     const lane = await laneFor('agenda.page', testInfo);
-    const all = await (await request.get(`${API}/sessions`)).json();
     const free = await bookableFor(request, lane.user, lane.day);
 
     // A queue to join, then one session before it and one after, so booking
     // order differs from time order.
-    const queued = free.find((s) => s.isFull);
-    expect(queued, 'the seed leaves a sold-out session on every day').toBeTruthy();
-    const open = free.filter((s) => !s.isFull && s.seatsLeft > 3
-      && (s.endsAt <= queued.startsAt || s.startsAt >= queued.endsAt));
-    const earlier = open.find((s) => s.endsAt <= queued.startsAt);
-    const later = [...open].reverse().find((s) => s.startsAt >= queued.endsAt);
-    expect(earlier && later, 'a free session either side of the sold-out one').toBeTruthy();
+    const fixture = free.filter((s) => s.isFull).map((queued) => {
+      const open = free.filter((s) => !s.isFull && s.seatsLeft > 3);
+      return {
+        queued,
+        earlier: open.find((s) => s.endsAt <= queued.startsAt),
+        later: [...open].reverse().find((s) => s.startsAt >= queued.endsAt),
+      };
+    }).find((f) => f.earlier && f.later);
+    expect(fixture, 'a sold-out session with a free one either side of it').toBeTruthy();
+    const { queued, earlier, later } = fixture;
     const mine = [earlier, queued, later];
-    expect(all.length).toBeGreaterThan(0);
 
     try {
       for (const s of [later, queued, earlier]) {
@@ -64,7 +65,9 @@ test.describe('My Agenda', () => {
       const before = await page.evaluate(() => performance.timeOrigin);
       await queuedRow.getByRole('button', { name: 'Leave the waitlist' }).click();
       await expect(rows.filter({ hasText: queued.title })).toHaveCount(0);
-      await expect(section.getByTestId('agenda-day-waitlisted')).toHaveCount(0);
+      const queuedLeft = planDay.waitlistedMinutes - (minutes(queued.endsAt) - minutes(queued.startsAt));
+      if (queuedLeft > 0) await expect(section.getByTestId('agenda-day-waitlisted')).toHaveText(`+${hours(queuedLeft)} waitlisted`);
+      else await expect(section.getByTestId('agenda-day-waitlisted')).toHaveCount(0);
       await rows.filter({ hasText: later.title }).getByRole('button', { name: 'Remove from my agenda' }).click();
       await rows.filter({ hasText: earlier.title }).getByRole('button', { name: 'Remove from my agenda' }).click();
       await expect(rows).toHaveCount(seeded);
