@@ -16,10 +16,12 @@ related: [seats, attendance, clock, venues, schedule, speakers, ui]
 
 # Agenda
 
-**My Agenda is a placeholder.** `/my-agenda` (`MyAgendaPage`, still in the nav,
-`/my-plan` redirects there) renders a `SectionHeader` and a "Coming soon" panel
-(`agenda-coming-soon`) with a `Browse the schedule` button — nothing else. Workshop
-teams design the page from scratch. Everything underneath it is built and tested:
+**My Agenda lists what you hold, with the travel between it.** `/my-agenda`
+(`MyAgendaPage`, in the nav, `/my-plan` redirects there) fetches `getSchedule`, keeps
+each day's sessions the store still holds (`reservationFor`), and renders them as
+`SessionCard variant="row"` under `agenda-day-<date>`, with a `TravelHop` between
+cross-venue confirmed seats (below). Booked-hours totals and an empty-state design are
+still open for a team to build. Everything underneath it is built and tested:
 adding a session takes a seat (seats doc), and the payloads below are served,
 with matching functions in `src/lib/api.js`. What a day is made of is decided in
 `server/lib/agenda.js`; routes in `server/routes/users.js` only validate and call it.
@@ -121,8 +123,8 @@ local `DTSTART`/`DTEND`, `UID:orbit-session-<id>@orbitconf.dev`, LOCATION
 
 ## Where to change…
 
-- The My Agenda page: `MyAgendaPage.jsx`; replace `tests/home.spec.js`'s
-  "My Agenda is a blank canvas" test when the placeholder goes.
+- The My Agenda page: `MyAgendaPage.jsx`;
+  travel is proved in `tests/agenda-travel.spec.js` (lane `agenda.travel`).
 - A new field on the day payload → `agenda.js:todayFor`; prove it in `tests/api/` with `startApi()`.
 - Suggestion ranking → `agenda.js:suggestionsFor` / `myTopics` / `openInSlot`.
 - Clash or total rules → `agenda.js:scheduleFor`/`clashesIn`, and any client

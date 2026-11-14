@@ -52,9 +52,12 @@ with different minutes; never assume symmetry.
   sessions (needs `.venue.id` and `to.room.walkMinutes`). Returns `null` if same
   venue or no route. Otherwise `{ gapMinutes, walk, options, fastest, free,
   impossible, freeTooSlow }`; each option gets `total = minutes + walk` and
-  `fits`. Excludes `Walk`. `free` = the first `costUsd === 0` option. No UI
-  calls it yet — it is there for an agenda view that warns about a cross-town
-  hop between two booked sessions; `tests/unit/travel.test.js` covers it.
+  `fits`. Excludes `Walk`. `free` = the first `costUsd === 0` option.
+- `travel.js:travelHops(sessions, travel)` — one day's sessions (each with
+  `reservation`); keeps `'confirmed'` only, sorts by start, pairs each with the next
+  confirmed one and returns `[{ from, to, assessment }]` for cross-venue pairs.
+  Waitlisted places are skipped, never paired. My Agenda renders each as a
+  `travel-hop` block (agenda doc). `tests/unit/travel.test.js` covers both.
 
 **`VenuesPage`** — URL params `venue` (id; defaults to first = primary) and
 `day` (defaults to `clock.day`). Unlike other pages, `set()` never deletes a
