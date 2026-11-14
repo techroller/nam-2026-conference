@@ -131,6 +131,8 @@ export const LANES = {
   // Check-ins and ratings only — no seat is booked, so agenda: false lets these
   // share a day with booking lanes (see lanes.test.js). The slot is the one
   // unattendedFor() picks its session from.
+  // Not clean: the test reads its own rows by position, so seeded seats on the day do not matter.
+  'agenda.travel':    { desktop: { user: jonas, day: 1 },                 mobile: { user: kenji, day: 1 } },
   'attendance.checkin-toast': { desktop: { user: kenji, day: 2, slot: '09:00', agenda: false },  mobile: { user: andy, day: 2, slot: '09:00', agenda: false } },
   // Rates for real, so it must land on day index 0 — `today` — per
   // smoke.spec.js's "no session in the future carries a rating".
