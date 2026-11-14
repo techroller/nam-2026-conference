@@ -202,5 +202,16 @@ export const toAnnouncement = (row) => ({
   venueId: row.venue_id, postedAt: row.posted_at, pinned: !!row.pinned,
 });
 
+/** A Social session plus its acts and details -> the party payload. */
+export function toParty(row, details, acts) {
+  return {
+    ...toSession(row),
+    lineup: acts.map((a) => ({ band: a.band, startsAt: a.starts_at, endsAt: a.ends_at })),
+    twoForOne: { startsAt: details.two_for_one_starts, endsAt: details.two_for_one_ends },
+    entry: { badgeRequired: !!details.badge_required, plusOnes: details.plus_ones, minAge: details.min_age },
+    lastShuttle: { time: details.last_shuttle_at, toVenueId: details.last_shuttle_to_venue_id },
+  };
+}
+
 /** "09:00" -> 540 */
 export const toMinutes = (hhmm) => Number(hhmm.slice(0, 2)) * 60 + Number(hhmm.slice(3, 5));

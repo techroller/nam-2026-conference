@@ -248,6 +248,26 @@ CREATE TABLE IF NOT EXISTS announcements (
   pinned    INTEGER NOT NULL DEFAULT 0
 );
 
+CREATE TABLE IF NOT EXISTS party_acts (
+  id         INTEGER PRIMARY KEY,
+  session_id INTEGER NOT NULL REFERENCES sessions(id),
+  position   INTEGER NOT NULL,
+  band       TEXT NOT NULL,
+  starts_at  TEXT NOT NULL,
+  ends_at    TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS party_details (
+  session_id                 INTEGER PRIMARY KEY REFERENCES sessions(id),
+  two_for_one_starts         TEXT NOT NULL,
+  two_for_one_ends           TEXT NOT NULL,
+  badge_required             INTEGER NOT NULL DEFAULT 1,
+  plus_ones                  TEXT NOT NULL,
+  min_age                    INTEGER NOT NULL,
+  last_shuttle_at            TEXT NOT NULL,
+  last_shuttle_to_venue_id   INTEGER NOT NULL REFERENCES venues(id)
+);
+
 CREATE INDEX IF NOT EXISTS idx_sessions_day       ON sessions(day);
 CREATE INDEX IF NOT EXISTS idx_sessions_track     ON sessions(track_id);
 CREATE INDEX IF NOT EXISTS idx_sessions_room      ON sessions(room_id);
@@ -266,6 +286,8 @@ export function migrate() {
 export function dropAll() {
   db.pragma('foreign_keys = OFF');
   db.exec(`
+    DROP TABLE IF EXISTS party_acts;
+    DROP TABLE IF EXISTS party_details;
     DROP TABLE IF EXISTS ratings;
     DROP TABLE IF EXISTS check_ins;
     DROP TABLE IF EXISTS reservations;

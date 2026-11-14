@@ -55,7 +55,7 @@ describe('parties', () => {
       assert.equal(p.entry.minAge, 21, p.title);
       assert.match(p.lastShuttle.time, /^\d\d:\d\d$/, p.title);
       assert.ok(venues.some((v) => v.id === p.lastShuttle.toVenueId), p.title);
-      assert.notEqual(p.lastShuttle.toVenueId, p.venueId, p.title);
+      assert.notEqual(p.lastShuttle.toVenueId, p.venue.id, p.title);
     }
     // the Foundry's abstract promises 01:15, which is after midnight
     assert.equal(parties[2].lastShuttle.time, '01:15');
