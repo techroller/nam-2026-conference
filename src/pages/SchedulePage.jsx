@@ -61,6 +61,10 @@ export function SchedulePage() {
   const sessions = data ?? [];
   const activeKeys = ['track', 'venue', 'level', 'format', 'tag', 'q'].filter((k) => filters[k] && filters[k] !== ALL);
   // Keep a view the user chose, never the list a filter forced.
+  const pickedTracks = filters.track === ALL ? [] : filters.track.split(',').filter(Boolean);
+  const toggleTrack = (slug) =>
+    set('track', (pickedTracks.includes(slug) ? pickedTracks.filter((x) => x !== slug) : [...pickedTracks, slug]).join(','));
+
   const clearAll = () => {
     const next = new URLSearchParams({ day: filters.day });
     if (params.get('view')) next.set('view', params.get('view'));
@@ -162,16 +166,16 @@ export function SchedulePage() {
       <div>
         <h3 className="sr-only text-[11px] font-semibold uppercase tracking-wider text-faint lg:not-sr-only lg:mb-2 lg:block">Track</h3>
         <div className="hide-scrollbar flex flex-nowrap gap-1.5 overflow-x-auto lg:flex-wrap">
-          <button type="button" onClick={() => set('track', ALL)}
+          <button type="button" onClick={() => set('track', ALL)} aria-pressed={pickedTracks.length === 0}
             className={cx('shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-medium transition-colors',
-              filters.track === ALL ? 'border-white/25 bg-overlay text-ink' : 'border-hairline text-muted hover:text-ink')}>
+              pickedTracks.length === 0 ? 'border-white/25 bg-overlay text-ink' : 'border-hairline text-muted hover:text-ink')}>
             All
           </button>
           {tracks.map((t) => {
             const a = accent(t.color);
-            const active = filters.track === t.slug;
+            const active = pickedTracks.includes(t.slug);
             return (
-              <button key={t.id} type="button" onClick={() => set('track', active ? ALL : t.slug)}
+              <button key={t.id} type="button" onClick={() => toggleTrack(t.slug)} aria-pressed={active}
                 className={cx('inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium transition-colors',
                   active ? a.chip : 'border-hairline text-muted hover:text-ink')}>
                 <span className={cx('size-1.5 rounded-full', a.dot)} />

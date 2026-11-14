@@ -233,3 +233,41 @@ test.describe('Ended sessions', () => {
     for (const l of ['Venue', 'Level', 'Format', 'Topic']) await expect(page.getByLabel(l)).toBeVisible();
   });
 });
+
+test.describe('Schedule track filter', () => {
+  test('several tracks can be picked, turned off one by one, and cleared with All', async ({ page, request }) => {
+    const boot = await (await request.get(`${API}/bootstrap`)).json();
+    const [a, b] = boot.tracks;
+    const count = async (qs = '') => (await (await request.get(`${API}/sessions${qs}`)).json()).length;
+    const label = (n) => new RegExp(`^${n} sessions?\\b`);
+    const pill = (t) => page.getByRole('button', { name: t.shortName ?? t.name, exact: true });
+    const all = page.getByRole('button', { name: 'All', exact: true });
+
+    // an existing single-track link behaves as before
+    const days = await conferenceDays();
+    await visit(page, `/schedule?view=list&day=${days[0]}&track=${a.slug}`);
+    await waitForResults(page);
+    await expect(page.getByTestId('result-count')).toHaveText(label(await count(`?day=${days[0]}&trackSlug=${a.slug}`)));
+
+    const filters = page.getByRole('button', { name: /^Filters/ });
+    if (await filters.isVisible()) await filters.click();
+    await expect(pill(a)).toHaveAttribute('aria-pressed', 'true');
+    await expect(all).toHaveAttribute('aria-pressed', 'false');
+
+    await pill(b).click();
+    await expect(pill(b)).toHaveAttribute('aria-pressed', 'true');
+    await expect(page).toHaveURL(new RegExp(`track=${a.slug}%2C${b.slug}|track=${a.slug},${b.slug}`));
+    await expect(page.getByTestId('result-count')).toHaveText(label(await count(`?day=${days[0]}&trackSlug=${a.slug},${b.slug}`)));
+    await shotForPR(page, 'two tracks picked');
+
+    await pill(a).click();
+    await expect(pill(a)).toHaveAttribute('aria-pressed', 'false');
+    await expect(page.getByTestId('result-count')).toHaveText(label(await count(`?day=${days[0]}&trackSlug=${b.slug}`)));
+
+    await pill(a).click();
+    await all.click();
+    await expect(all).toHaveAttribute('aria-pressed', 'true');
+    await expect(page).not.toHaveURL(/track=/);
+    await expect(page.getByTestId('result-count')).toHaveText(label(await count(`?day=${days[0]}`)));
+  });
+});
