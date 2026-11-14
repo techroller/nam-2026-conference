@@ -12,6 +12,7 @@ files:
 tests:
   - tests/schedule.spec.js
   - tests/session.spec.js
+  - tests/api/track-filter.test.js
 related: [seats, attendance, agenda, venues, speakers, ui, clock]
 ---
 
@@ -29,7 +30,7 @@ and a bound `?` to `args`:
 | param | clause |
 | --- | --- |
 | `day` | `s.day = ?` |
-| `trackSlug` | `t.slug = ?` |
+| `trackSlug` | `t.slug IN (?, …)` — comma-separated, trimmed, empties dropped |
 | `venueId` / `roomId` | `v.id = ?` / `r.id = ?` |
 | `level` / `format` | `s.level = ?` / `s.format = ?` |
 | `q` | `LIKE %q%` on title, abstract, subtitle, or any speaker name (`EXISTS`) |
@@ -53,6 +54,7 @@ lists are plain `toSession` — no speakers/tags. **`/:id.ics`** is registered
 **`SchedulePage`** reads everything from `useSearchParams`:
 `day` (default `clock.day` if it is a conference day, else `days[0].date`),
 `track`, `venue` (venue id), `level`, `format`, `tag` (topic slug), `q`, `view`.
+`track` holds a comma list (`pickedTracks`); the track pills toggle one slug each (`aria-pressed`) and All clears them.
 Page keys map to API keys in the `useFetch` call (`track→trackSlug`,
 `venue→venueId`, `tag→tagSlug`). `set(key, value)` deletes the key for `'all'`/empty
 and writes with `{ replace: true }`; `clearAll` keeps `day` and an explicit `view`.
@@ -73,7 +75,7 @@ buttons `tab-<date>`, track pills, and `Select`s for venue/level/format/topic.
 Below `lg` the open rail is compact so the first card stays in view at 393×659: days in one
 row (no weekday or count), tracks in one scrolling row (the Day and Track headings turn screen-reader-only), selects in two columns, and the
 My agenda card is desktop-only (`starred-count` stays in the DOM, `hidden lg:block`);
-its link opens `/my-agenda`, which is a placeholder (agenda doc).
+its link opens `/my-agenda`, which lists what you have booked (agenda doc).
 `result-count` shows `Loading…` then `N sessions`.
 
 **`ScheduleGrid`** (`schedule-grid`, `role="table"`) — splits `sessions` into
